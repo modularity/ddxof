@@ -32,6 +32,9 @@ export default class CategorySelection extends Component {
       imageLinks: [],
       imageCacheCount: 0,
     };
+    firebase.analytics().setCurrentScreen('algorithm view');
+    var _id = this.props.navigation.state.params.item.id;
+    firebase.analytics().logEvent('algorithm_view', { id: _id });
   }
 
   static navigationOptions = ({ navigation }) => {
@@ -43,15 +46,18 @@ export default class CategorySelection extends Component {
   };
 
   componentWillMount() {
-    firebase.analytics().setCurrentScreen('algorithm view');
-    var _id = this.props.navigation.state.params.item.id;
-    firebase.analytics().logEvent('algorithm_view', { id: _id });
+    this.checkandupdatefavorite();
+
+  }
+
+  componentDidMount() {
+    this.init();
   }
 
   // when page loads, parse images of the selected post and save default values to state
   // for posts with multiple images, dynamically add another TabNavigator object w links to content
   // if post is saved as fav, load images from storage
-  componentDidMount() {
+  init() {
     // parse category object from props
     var postItem = this.props.navigation.state.params.item;
     var postURL = 'https://ddxof.com/?p='+postItem.id.toString();
@@ -120,30 +126,31 @@ export default class CategorySelection extends Component {
                     imageSrc: currentImgLink,
                     imageLinks: multiTabs,
                     renderMultiTab: _renderMultiTab });
+
+
   }
 
-  // need to wait for async functions(image caching w react-native-fetch-blob)
-  // will check if postObj.algCount equal flag(int) for image caching
-  shouldComponentUpdate(nextProps, nextState) {
-      if (nextState.imageCacheCount == nextState.postObj.algCount) {
-        // now that all images have been cached, add new favorite to storage
-        var savedImages = this.state.imageLinks;
-        var fav = {
-            id: this.state.postObj.id,
-            posts: this.state.postObj,
-            algorithm_url: savedImages[0],
-            algorithm_url2: savedImages[1],
-            algorithm_url3: savedImages[2],
-            algorithm_url4: savedImages[3],
-            algorithm_url5: savedImages[4],
-            algorithm_url6: savedImages[5]
-        }
-        realm.write(() => {
-            realm.create('Favorite', fav);
-        })
-        console.log("save fav ",fav);
+  checkandupdatefavorite() {
+    // need to wait for async functions(image caching w react-native-fetch-blob)
+    // will check if postObj.algCount equal flag(int) for image caching
+    if (this.state.imageCacheCount == this.state.postObj.algCount) {
+      // now that all images have been cached, add new favorite to storage
+      var savedImages = this.state.imageLinks;
+      var fav = {
+          id: this.state.postObj.id,
+          posts: this.state.postObj,
+          algorithm_url: savedImages[0],
+          algorithm_url2: savedImages[1],
+          algorithm_url3: savedImages[2],
+          algorithm_url4: savedImages[3],
+          algorithm_url5: savedImages[4],
+          algorithm_url6: savedImages[5]
       }
-      }
+      realm.write(() => {
+          realm.create('Favorite', fav);
+      })
+      console.log("save fav ",fav);
+    }
   }
 
   // check if the current post is already a fav, then it will update image source to storage
@@ -153,7 +160,6 @@ export default class CategorySelection extends Component {
     var fav = realm.objects('Favorite').filtered('id == $0', this.state.postObj.id)[0];
     if ( fav !== undefined ) {
       var img = fav.image;
-      console.log("item was saved as a favorite", img);
       isFav = true;
     }
     return isFav;
@@ -173,6 +179,7 @@ export default class CategorySelection extends Component {
   // each number will correspond to an alternative content
   // where onPress will update the state variable that renders the main image
   createMultiTab() {
+    this.checkandupdatefavorite();
     console.log("renderMultiTab with ", this.state.imageLinks[this.state.imageIndex]);
     var render = null;
     if (this.state.renderMultiTab) {
@@ -237,6 +244,7 @@ export default class CategorySelection extends Component {
       this.setState({favIcon: 'star'});
       // image cache for post added to favorites list, makes local files for each png and saves to state asynchronously
       this.saveImagesToFile();
+    }
   }
 
   // async api calls to save algorithm images to device storage
@@ -267,6 +275,7 @@ export default class CategorySelection extends Component {
               console.log("file saved to ", imgs[i]);
               // increment image cache count, flag for tracking completion of caching all images
               cacheCount = cacheCount+1;
+              console.log("cacheCount", cacheCount);
             }
             this.setState({imageLinks: imgs, imageCacheCount: cacheCount});
           })
@@ -307,6 +316,7 @@ export default class CategorySelection extends Component {
         />
       );
     } else if (!this.state.renderImageError) {
+      console.log("image src", this.state.imageSrc);
       return (
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
             <StatusBarBackground style={{backgroundColor: 'transparent'}} />
