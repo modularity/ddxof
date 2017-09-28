@@ -1,6 +1,6 @@
 'use strict';
 import React, { Component } from 'react';
-import { View, Text, FlatList, Image, Alert, Share, WebView, Dimensions, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, FlatList, Image, ScrollView, Alert, Share, WebView, Dimensions, TouchableOpacity, Platform } from 'react-native';
 import { TabNavigator, NavigationActions } from 'react-navigation';
 // UI imports
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -44,11 +44,6 @@ export default class CategorySelection extends Component {
       tabBarVisible: false,
     };
   };
-
-  componentWillMount() {
-    this.checkandupdatefavorite();
-
-  }
 
   componentDidMount() {
     this.init();
@@ -94,11 +89,13 @@ export default class CategorySelection extends Component {
     // need to query Favorite schema and check for current Post
     var _favIcon = 'star-o';
     var fav = realm.objects('Favorite').filtered('posts == $0', postItem)[0];
+
     if (fav !== undefined) {
       _favIcon = 'star';
       // pull images from storage, override the url links
       // currently saves correctly but need to modify the format to pull images
       // different formatting needed to support image source from uri and local storage
+  /* bug : issue with image caching, so dont want to update image source
       multiTabs[0] = fav.algorithm_url;
       //currentImgLink = require("'"+multiTabs[0]"'")}
       currentImgLink = {uri: fav.algorithm_url};
@@ -117,6 +114,7 @@ export default class CategorySelection extends Component {
       if (lenImg == 6) {
         multiTabs[5] = fav.algorithm_url6;
       }
+  */
     }
 
     // save init values to state
@@ -126,31 +124,29 @@ export default class CategorySelection extends Component {
                     imageSrc: currentImgLink,
                     imageLinks: multiTabs,
                     renderMultiTab: _renderMultiTab });
-
-
   }
 
   checkandupdatefavorite() {
     // need to wait for async functions(image caching w react-native-fetch-blob)
     // will check if postObj.algCount equal flag(int) for image caching
-    if (this.state.imageCacheCount == this.state.postObj.algCount) {
+    //if (this.state.imageCacheCount == this.state.postObj.algCount) {
       // now that all images have been cached, add new favorite to storage
       var savedImages = this.state.imageLinks;
       var fav = {
           id: this.state.postObj.id,
           posts: this.state.postObj,
-          algorithm_url: savedImages[0],
+    /*      algorithm_url: savedImages[0],
           algorithm_url2: savedImages[1],
           algorithm_url3: savedImages[2],
           algorithm_url4: savedImages[3],
           algorithm_url5: savedImages[4],
-          algorithm_url6: savedImages[5]
+          algorithm_url6: savedImages[5] */
       }
       realm.write(() => {
           realm.create('Favorite', fav);
       })
       console.log("save fav ",fav);
-    }
+    //}
   }
 
   // check if the current post is already a fav, then it will update image source to storage
@@ -165,12 +161,13 @@ export default class CategorySelection extends Component {
     return isFav;
   }
 
-  // when an image tab is pressed, update state and trigger render()
+  // when an image tab is pressed, update state with new index and imageSrc to trigger render()
   pressMultiTab(link, i) {
+    console.log("pressed multitab image link");
     var _i = i+1;
-    console.log("selected image "+_i+" post id "+this.state.postObj.id);
-    var updateImg = {uri: this.state.imageLinks[this.state.imageIndex]};
-    console.log("image link", updateImg);
+    console.log("selected multitab image index", _i);
+    var updateImg = {uri: this.state.imageLinks[i]};
+    console.log("update image link", updateImg);
     this.setState({imageIndex: i, imageSrc: updateImg});
   }
 
@@ -179,17 +176,15 @@ export default class CategorySelection extends Component {
   // each number will correspond to an alternative content
   // where onPress will update the state variable that renders the main image
   createMultiTab() {
-    this.checkandupdatefavorite();
-    console.log("renderMultiTab with ", this.state.imageLinks[this.state.imageIndex]);
     var render = null;
     if (this.state.renderMultiTab) {
        render = (
           <View style={{flexDirection: 'row', alignItems: 'stretch'}}>
-            {this.state.imageLinks.map((altLink, i) => {
+            {this.state.imageLinks.map((link, i) => {
               return (
                 <View key={i}>
-                  <TouchableOpacity onPress={ () => this.pressMultiTab(altLink, i) }>
-                    <Text style={{color: '#fff', alignSelf: 'center', textAlign: 'center'}}> Image{ i+1 } </Text>
+                  <TouchableOpacity onPress={ () => this.pressMultiTab(link, i) }>
+                    <Text style={{color: '#979797', alignSelf: 'center', textAlign: 'center'}}> Image{ i+1 } </Text>
                   </TouchableOpacity>
                 </View>
               )
@@ -285,6 +280,7 @@ export default class CategorySelection extends Component {
 
         })
     })
+    this.checkandupdatefavorite();
   }
 
   // handler for cases where the image doesn't load, especially api calls to LucidChart images which are known to fail even in the browser
@@ -301,7 +297,10 @@ export default class CategorySelection extends Component {
       this.setState({ renderImageError: false, imageSrc: src });
   }
 
-  // returns either a pan/zoom of the current image(default or selected for multiple algorithms) or webview of the full post(wp)
+  _onLoadEnd = (event) => {
+      console.log('_onLoadEnd', event.nativeEvent);
+  };
+
   render() {
     var images = this.state.imageLinks;
     //console.log("image index "+this.state.imageIndex+" render image link "+images[this.state.imageIndex]);
@@ -327,7 +326,7 @@ export default class CategorySelection extends Component {
               minimumZoomScale={1}
               maximumZoomScale={7}
               androidScaleType="center"
-              onLoadEnd={ () => console.log("Image loaded!") }
+              onLoadEnd={this._onLoadEnd}
               onError={ () => this.imageError(this.state.imageSrc) }
               style={{width: _width, height: _height }} />
             </View>

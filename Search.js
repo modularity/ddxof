@@ -132,7 +132,7 @@ export default class Search extends Component {
 
   imageError(error, src) {
     //var url = src.uri;
-    console.log("recent image "+src+" error "+ error);
+    console.log("search image error ", error);
     //this.setState({uri: url});
   }
 

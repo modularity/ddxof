@@ -40,7 +40,6 @@ export default class Recent extends Component {
       params: { item: _item}
     });
 
-    console.log("recent route item ", _item );
     this.props.navigation.dispatch(routeToSelection);
   }
 
@@ -92,9 +91,19 @@ export default class Recent extends Component {
       }
     }
 
-    imageError(error) {
+    imageError(error, item) {
+      //var url = src.uri;
       console.log("recent image error ", error);
-      //this.setState({uri: url});
+      console.log("recent image ref", item);
+      //update url with cache busting technique
+      var src = item.algorithm_url + "?" + new Date().getTime();
+      console.log("update source", src);
+      // need to update state to trigger render with the new value
+      // can't update state object and realm query by reference
+      // need to directly update the image source
+      realm.write(() => {
+          item.algorithm_url = src;
+      });
     }
     render() {
       console.log("lenPosts", this.state.recent.length);
@@ -119,7 +128,7 @@ export default class Recent extends Component {
                     <TouchableOpacity onPress={ () => this.routeToContent(item) }>
                       <Image style={{width: _width, height: 250, borderWidth: 5, borderRadius: 5, borderColor: '#979797'}}
                              source={{uri: item.algorithm_url}}
-                             onError={(error) => this.imageError(error) }/>
+                             onError={(error) => this.imageError(error, item) }/>
                      {item.algCount > 1 ? <View style={{marginTop: -30, justifyContent: 'flex-start', alignItems: 'center'}}>
                                           <Badge containerStyle={{width: 35, backgroundColor: '#3678a0'}}
                                             value={item.algCount}
@@ -133,17 +142,17 @@ export default class Recent extends Component {
             </List>
         </View>
       );
+    }
   }
-}
 
 
-const styles = StyleSheet.create({
+  const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'center',
   },
-});
+  });
 
 /*
 <View style={{justifyContent: 'center', alignItems: 'center', alignSelf: 'center'}}>

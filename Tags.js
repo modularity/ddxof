@@ -46,6 +46,7 @@ export default class Tags extends Component {
     this.props.navigation.dispatch(routeToSelection);
   }
 
+// {realm.objects('Post').filtered('categories == $0', item).length}
   renderItem = ({item, i}) => (
     <ListItem
       onPress={ () => this.routeToContent(item) }
@@ -53,27 +54,27 @@ export default class Tags extends Component {
       titleStyle={{color: '#E00000'}}
       badge={{ value: item.count, textStyle: { color: '#979797' }, containerStyle: { backgroundColor: '#fff' } }}
     />
-  );
+);
 
 //  _keyExtractor = (item, index) => item.id;
   _keyExtractor = (item) => item.name.toString();
 
   render() {
-    console.log("len tags", this.state.tags.length);
-    return (
-      <View style={{flex: 1, backgroundColor: 'white'}}>
-          <StatusBarBackground />
-          <View style={{paddingLeft: 20, paddingTop: 5, backgroundColor: 'white'}}>
-            <Text style={{padding: 2, width: 48, backgroundColor: 'black', color: 'white', fontSize: 14}}>ddxof:</Text>
-            <Text style={{fontSize: 30}}>Tags</Text>
-          </View>
-        <List>
-          <FlatList
-            data={ this.state.tags }
-            renderItem={ this.renderItem }
-            keyExtractor={ this._keyExtractor } />
-        </List>
-      </View>
+      console.log("len tags", this.state.tags.length);
+      return (
+        <View style={{flex: 1, backgroundColor: 'white'}}>
+            <StatusBarBackground />
+            <View style={{paddingLeft: 20, paddingTop: 5, backgroundColor: 'white'}}>
+              <Text style={{padding: 2, width: 48, backgroundColor: 'black', color: 'white', fontSize: 14}}>ddxof:</Text>
+              <Text style={{fontSize: 30}}>Tags</Text>
+            </View>
+          <List>
+            <FlatList
+              data={ this.state.tags }
+              renderItem={ this.renderItem }
+              keyExtractor={ this._keyExtractor } />
+          </List>
+  </View>
     );
   }
 }

@@ -29,7 +29,7 @@ export default class Favorites extends Component {
   };
 
   componentWillMount() {
-    firebase.analytics().setCurrentScreen('Favorites');
+    //firebase.analytics().setCurrentScreen('Favorites');
   }
 
   componentWillUnMount() {
