@@ -1,3 +1,8 @@
+/*
+    This file handles the logic and UI for the Search page.
+    The UI is a FlatList of relevant search results, same format as Recent, CategorySelection, TagSelection.
+    The data is queried from the realm storage on the user's device.
+*/
 'use strict';
 import React, { Component } from 'react';
 import { View, Text, FlatList, Alert, TouchableOpacity, Image, Dimensions } from 'react-native';
@@ -18,15 +23,17 @@ export default class Search extends Component {
       results: [],
     };
   }
-
+  // configuration needed for the StackNavigator navigation object
   static navigationOptions = {
       header: null
   };
 
+  // when the page is ready to render, send update to firebase
   componentWillMount() {
     firebase.analytics().setCurrentScreen('Tags');
   }
 
+  // router for naviation to SingleView via StackNavigator with selected item parameter
   routeToContent(_item) {
     console.log("route search result to view");
     const routeToSelection = NavigationActions.navigate({
@@ -36,19 +43,17 @@ export default class Search extends Component {
     this.props.navigation.dispatch(routeToSelection);
   }
 
-  routeToPage(route) {
-    const routeToSelection = NavigationActions.navigate({
-      routeName: route,
-    });
-
-    this.props.navigation.dispatch(routeToSelection);
-  }
-
+  // this is the query for relevant content to user input
+  // for simplicity and speed of results, only query post titles that have similar text
   checkForPage(text) {
     var postResult = realm.objects('Post').filtered('title CONTAINS $0', text);
+    // FLAG
     console.log("post result", postResult[0]);
     console.log("post len", postResult.length);
-/*    var catResult = realm.objects('Category').filtered('name == $0', text);
+/*
+    // could add query results for Category and Tags in the future
+    // recommend to add UI element to the let the user toggle between these query types
+    var catResult = realm.objects('Category').filtered('name == $0', text);
     var tagResult = realm.objects('Tag').filtered('name == $0', text);
     console.log("post result", postResult[0]);
     console.log("post len", postResult.length);
@@ -71,7 +76,7 @@ export default class Search extends Component {
 */
     // push relevant results to state to be rendered
     if (postResult[0] !== undefined && postResult.length > 0) {
-      console.log("saving query result to state", postResult);
+      //console.log("saving query result to state", postResult);
       this.setState({results: postResult});
     }
   }
@@ -122,20 +127,26 @@ export default class Search extends Component {
     />
   );
 
+  // creates a unique key for each item in the FlatList/VirtualizedList
   _keyExtractor = (item) => item.title.toString();
 
-  checkImageLinks(item) {
-    if (item.algorithm_url === '') {
-      console.log("empty url string for "+item.title+" "+item.algorithm_url+" "+item.id, item);
-    }
+  // handles image error for Image Component via onError callback
+  // utilize image cache busting technique of appending time param to the image url
+  imageError(error, item) {
+    // FLAG
+    console.log("recent image error ", error);
+    console.log("recent image ref", item);
+    //update url with cache busting technique
+    var src = item.algorithm_url + "?" + new Date().getTime();
+    console.log("update source", src);
+    realm.write(() => {
+        item.algorithm_url = src;
+    });
   }
 
-  imageError(error, src) {
-    //var url = src.uri;
-    console.log("search image error ", error);
-    //this.setState({uri: url});
-  }
-
+  // has padding at the page top for iOS: StatusBarBackground
+  // header added to each post in the FlatList with relevant tags and categories
+  // posts with multiple algorithm images have badge overlay
   render() {
     var _width = Dimensions.get('window').width*.9;
     return (
@@ -159,11 +170,10 @@ export default class Search extends Component {
                   <View style={{justifyContent: 'center', alignItems: 'center', padding: 20}}>
                     <Text style={{color: '#979797', fontSize: 12}}>{ this.itemHeader(item) }</Text>
                     <Text style={{color: '#E00000', fontSize: 20}}>{item.title}</Text>
-                    { this.checkImageLinks(item) }
                     <TouchableOpacity onPress={ () => this.routeToContent(item) }>
                       <Image style={{width: _width, height: 250, borderWidth: 5, borderRadius: 5, borderColor: '#979797'}}
                              source={{uri: item.algorithm_url}}
-                             onError={ (error, source) => this.imageError(error, source) }/>
+                             onError={ (error) => this.imageError(error, item) }/>
                      {item.algCount > 1 ? <View style={{marginTop: -30, justifyContent: 'flex-start', alignItems: 'center'}}>
                                           <Badge containerStyle={{width: 35, backgroundColor: '#3678a0'}}
                                             value={item.algCount}

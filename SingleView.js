@@ -1,3 +1,12 @@
+/*
+    This file manages logic and UI for image algorithm views.
+    PhotoView allows the user to pan and zoom the image.
+    The TabNav is hidden on this page to facilitate a custom page tab bar added to the bottom of the page.
+    The tab bar includes: Share, Favorite and Full Text.
+    Share is implemented via RN's Share Component and will integrate with relevant apps that the user has installed on their device.
+    Favorite will update the realm storage with this post(add or remove), send info to firebase and toggle button.
+    Full Text will link the user via WebView to the affliate Wordpress post for the selected algorithm set.
+*/
 'use strict';
 import React, { Component } from 'react';
 import { View, Text, FlatList, Image, ScrollView, Alert, Share, WebView, Dimensions, TouchableOpacity, Platform } from 'react-native';
@@ -19,8 +28,6 @@ export default class CategorySelection extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      // placeholder but will need to parse categoryName from props
-      pageName: 'placeholder2',
       postObj: {},
       postLink: '',
       favIcon: 'star-o',
@@ -32,11 +39,9 @@ export default class CategorySelection extends Component {
       imageLinks: [],
       imageCacheCount: 0,
     };
-    firebase.analytics().setCurrentScreen('algorithm view');
-    var _id = this.props.navigation.state.params.item.id;
-    firebase.analytics().logEvent('algorithm_view', { id: _id });
   }
 
+  // configuration needed for StackNavigator navigation object
   static navigationOptions = ({ navigation }) => {
     const {state, setParams} = navigation;
     return {
@@ -47,6 +52,13 @@ export default class CategorySelection extends Component {
 
   componentDidMount() {
     this.init();
+  }
+
+  // when the page is ready to render, send updates to firebase
+  componentWillMount() {
+    firebase.analytics().setCurrentScreen('algorithm view');
+    var _id = this.props.navigation.state.params.item.id;
+    firebase.analytics().logEvent('algorithm_view', { id: _id });
   }
 
   // when page loads, parse images of the selected post and save default values to state
@@ -95,7 +107,9 @@ export default class CategorySelection extends Component {
       // pull images from storage, override the url links
       // currently saves correctly but need to modify the format to pull images
       // different formatting needed to support image source from uri and local storage
-  /* bug : issue with image caching, so dont want to update image source
+  /*  // bug : issue with offline images(image caching)
+      // need a flag/callback to signify completion of caching all images for the selected post
+      // react-native-fetch-blob didn't offer a done() or finish() callback when this app was made
       multiTabs[0] = fav.algorithm_url;
       //currentImgLink = require("'"+multiTabs[0]"'")}
       currentImgLink = {uri: fav.algorithm_url};
@@ -116,7 +130,6 @@ export default class CategorySelection extends Component {
       }
   */
     }
-
     // save init values to state
     this.setState({ postObj: postItem,
                     postLink: postURL,
@@ -126,11 +139,10 @@ export default class CategorySelection extends Component {
                     renderMultiTab: _renderMultiTab });
   }
 
+  // saves post as favorite to realm: Favorite
+  // algorithm url are optional(type: data)
+  // need to ensure that algorithm_url* are saved as png format to render properly
   checkandupdatefavorite() {
-    // need to wait for async functions(image caching w react-native-fetch-blob)
-    // will check if postObj.algCount equal flag(int) for image caching
-    //if (this.state.imageCacheCount == this.state.postObj.algCount) {
-      // now that all images have been cached, add new favorite to storage
       var savedImages = this.state.imageLinks;
       var fav = {
           id: this.state.postObj.id,
@@ -145,14 +157,15 @@ export default class CategorySelection extends Component {
       realm.write(() => {
           realm.create('Favorite', fav);
       })
+      // FLAG
       console.log("save fav ",fav);
-    //}
   }
 
-  // check if the current post is already a fav, then it will update image source to storage
+  // check if the current post is already a fav
+  // if so, will toggle the heart icon
+  // if offline content was configured, then it would update image source from url to user's device storage
   checkIfFav() {
     var isFav = false;
-    // query Favorite schema set for a match with the current post id, either 0 or 1 response
     var fav = realm.objects('Favorite').filtered('id == $0', this.state.postObj.id)[0];
     if ( fav !== undefined ) {
       var img = fav.image;
@@ -163,10 +176,10 @@ export default class CategorySelection extends Component {
 
   // when an image tab is pressed, update state with new index and imageSrc to trigger render()
   pressMultiTab(link, i) {
-    console.log("pressed multitab image link");
     var _i = i+1;
-    console.log("selected multitab image index", _i);
     var updateImg = {uri: this.state.imageLinks[i]};
+    // FLAG
+    console.log("selected multitab image index", _i);
     console.log("update image link", updateImg);
     this.setState({imageIndex: i, imageSrc: updateImg});
   }
@@ -196,21 +209,19 @@ export default class CategorySelection extends Component {
      return render;
   }
 
-
-  // call firebase to log event for sharing, favorite, full-text
+  // calls firebase to log event for sharing, favorite, full-text
   firebaseAnalytics(_event) {
     // send firebase event to log user intent to share
     var _id = this.state.postObj.id;
     firebase.analytics().logEvent(_event, { id: _id });
   }
 
-
   // utilizes RN Share to integrate with app on the user's device: mail, fb, twitter, etc
   shareContent() {
     this.firebaseAnalytics('Share_content');
     // open ui module to allow user to share content via installed apps on their device
     Share.share({
-      message: 'Less mnemonics, more flowcharts',
+      message: 'ddxof: Less mnemonics, more flowcharts',
       url: this.state.postLink,
       title: this.state.postObj.title
     }, {
@@ -301,6 +312,9 @@ export default class CategorySelection extends Component {
       console.log('_onLoadEnd', event.nativeEvent);
   };
 
+  // loads full screen image with pan and zoom functionality
+  // bottom tab bar to share, favorite and view full text
+  // for posts with mulitiple algorithm images: there is a set of buttons to toggle between them
   render() {
     var images = this.state.imageLinks;
     //console.log("image index "+this.state.imageIndex+" render image link "+images[this.state.imageIndex]);

@@ -17,7 +17,6 @@ export default class ListPosts extends Component {
       params: { item: _item}
     });
 
-    console.log("recent route item ", _item );
     this.props.navigation.dispatch(routeToSelection);
   }
 

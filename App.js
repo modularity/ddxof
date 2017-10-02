@@ -1,9 +1,16 @@
+/*
+    This file is the entry point of the ddxof application.
+    It configures Navigation objects.
+    It handles logic for pulling content from the WP REST API.
+    After pulling content from the API, it saves a pruned verison to the users device.
+*/
+
 'use strict';
 import React, { Component } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 // navigation imports
 import { TabNavigator, StackNavigator } from 'react-navigation';
-// include layout files
+// include layout files to integrate with the navigation objects
 import Recent from './Recent';
 import Categories from './Categories';
 import CategorySelection from './CategorySelection';
@@ -12,13 +19,13 @@ import SingleView from './SingleView';
 import Tags from './Tags';
 import Search from './Search';
 import Favorites from './Favorites';
-// UI import
+// UI import for navigation objects
 import Icon from 'react-native-vector-icons/FontAwesome';
 // axios import for wp api call
 import axios from 'axios';
 // realm import for json storage and use
 import realm from './Realm';
-// import for date comparison
+// import for date comparison in timestamp for api calls
 import moment from 'moment';
 
 export default class App extends Component {
@@ -34,11 +41,14 @@ export default class App extends Component {
 
     // check the initialization requirements for app when it loads
     this.checkInit();
-    // hide yellow warning error for "Warning: flattenChildren(...):Encountering two children with the same key"
+
+    // FLAG
+    // hide yellow warning errors
     console.ignoredYellowBox = ["Warning: flattenChildren",
                                 "source.uri should not be an empty string",
                                 "Warning: Failed prop type: Invalid prop "];
 
+    // FLAG
     // add to temporarily remove console statements from being run
     // will clean up and remove this and all console statements when actually ready to ship
     if((process.env.NODE_ENV || '').toLowerCase() === 'production'){
@@ -49,12 +59,6 @@ export default class App extends Component {
       console.error = function () {}
       console.debug = function () {}
     }
-
-  }
-
-  // not sure this needs to be here, seems like the constuctor is a better place for app initialization, should only run once
-  componentDidMount(){
-    //this.checkInit();
   }
 
   // this function evaluates if the app needs initialization data from the WP REST API
@@ -64,26 +68,28 @@ export default class App extends Component {
  checkInit() {
     var timestamps = realm.objects('Timestamp');
     var posts = realm.objects('Post');
+    // verifies if the timestamp has been created before and if posts are empty
     if (timestamps.length == 0 || posts.length == 0) {
-      console.log("loop a");
       realm.write(() => {
         realm.create('Timestamp', {
           date: new Date(),
         });
       })
       var time = realm.objects('Timestamp');
-      console.log("init of application, timestamp len", time.length); // first instance of application
+      // FLAG first instance of application
+      console.log("init of application, timestamp len", time.length);
       this.getCategoryjson(1, 100);
       this.getTagjson(1, 100);
       this.getPOSTjson(1, 100);
     } else {
-      console.log("loop b");
       var lastCheck = realm.objects('Timestamp')[0].date;
-      console.log("not app init, last timestamp", lastCheck); // not the first instance of the application
+      // FLAG not the first instance of the application
+      console.log("not app init, last timestamp", lastCheck);
       // check if two weeks since last api pull, if so update db
       var today = moment();
       var timeBtw = Math.abs(today.diff(lastCheck, 'days'));
       if ( timeBtw > 14 ) {
+        // FLAG
         console.log("old cache, update content");
         realm.write(() => {
           // delete old storage
@@ -109,14 +115,13 @@ export default class App extends Component {
     }
   }
 
-
   // calls WP API in batched requests via parameters: page(integers starting with 1), per_page(entries per page from 1-100)
   // checkInit() calls this with page=1 and per_page=100
   // each call compares the total number of categories(via response header 'x-wp-total') and the number it's retreived so far
   // if the number retreived < total number available, it will call the api again with updated parameters
   getCategoryjson(pages, perPage) {
     var pageParam = 'page='+pages;
-    var perPageParam = 'per_page='+perPage; // as of 9/11 there are 32 categories
+    var perPageParam = 'per_page='+perPage;
     var _url = 'https://ddxof.com/wp-json/wp/v2/categories/?'+pageParam+'&'+perPageParam;
     axios({
       url: _url,
@@ -125,29 +130,23 @@ export default class App extends Component {
     })
     .then((response) => {
       if (response.status === 200) {
-        //save json to state
-        console.log("number of categories", response.headers['x-wp-total']);
+        //FLAG save json to state
+        console.log("total number of categories", response.headers['x-wp-total']);
         this.setState({
           category_json: response.data,
           totalCatNum: response.headers['x-wp-total'],
         });
-        // UPDATE need to find right format to concat next set of entries
       }
     })
     .catch(function(error) {
-      console.log("getCategoryjson error", error);
-      /* android bug: 'undefined is not an object(evaluating error.response.status)'
-      if (error.response.status === 500) {
-        Alert.alert("Error", "Unable to connect to our server, please try again.");
-      }
-      */
+      Alert.alert("Error", "There was an error loading category content.");
     })
     .done(() => {
-      // check X-WP-TOTAL in header to get total # of categories
+      // FLAG check X-WP-TOTAL in header to get total # of categories
       console.log("state numCats", this.state.numCats);
-      // call api again if needed to pull more in a seperate batch request
       if (this.state.numCats > pages*perPage) {
         var updatePage = Number(pages)+1;
+        // FLAG call api again if needed to pull more in a seperate batch request
         console.log("call cat again", updatePage);
         this.getCategoryjson(updatePage, perPage);
       }
@@ -170,7 +169,7 @@ export default class App extends Component {
       realm.write(() => { realm.create('Category', cat) })
     });
     this.setState({realmCat: realm.objects('Category')});
-    console.log("post save to realm catList", catList);
+    // console.log("post save to realm catList", catList);
   }
 
   // calls WP API in batched requests via parameters: page(integers starting with 1), per_page(entries per page from 1-100)
@@ -179,9 +178,8 @@ export default class App extends Component {
   // if the number retreived < total number available, it will call the api again with updated parameters
   getTagjson(pages, perPage) {
     var pageParam = 'page='+pages;
-    var perPageParam = 'per_page='+perPage; //as of 9/11 there are 88 tags
+    var perPageParam = 'per_page='+perPage;
     var _url = 'https://ddxof.com/wp-json/wp/v2/tags/?'+pageParam+'&'+perPageParam;
-    console.log("tag url", _url);
     axios({
       url: _url,
       method: 'get',
@@ -194,23 +192,17 @@ export default class App extends Component {
           tag_json: response.data,
           totalTagNum: response.headers['x-wp-total'],
         });
-        // UPDATE need to find right format to concat next set of entries
       }
     })
     .catch(function(error) {
-      console.log("getTagjson error", error);
-      /* android bug: 'undefined is not an object(evaluating error.response.status)'
-      if (error.response.status === 500) {
-        Alert.alert("Error", "Unable to connect to our server, please try again.");
-      }
-      */
+      Alert.alert("Error", "There was an error loading Tag content");
     })
     .done(() => {
-      // check X-WP-TOTAL in header to get total # of tags
+      // FLAG check X-WP-TOTAL in header to get total # of tags
       console.log("state numTags", this.state.numTags);
-      // call api again if needed to pull more in a seperate batch request
       if (this.state.numTags > pages*perPage) {
         var updatePage = Number(pages)+1;
+        // FLAG call api again if needed to pull more in a seperate batch request
         console.log("call tag again", updatePage);
         this.getTagjson(updatePage, perPage);
       }
@@ -243,35 +235,27 @@ export default class App extends Component {
     var pageParam = 'page='+pages;
     var perPageParam = 'per_page='+perPage; //as of 9/11 there are 114 posts
     var _url = 'https://ddxof.com/wp-json/wp/v2/posts/?'+pageParam+'&'+perPageParam;
-    console.log("post url", _url);
     axios({
       url: _url,
       method: 'get',
       headers: { 'Content-Type': 'application/json'}
     })
     .then((response) => {
-      console.log("post json", response.data);
       //save json to state
       this.setState({
         post_json: response.data,
         numPosts: response.headers['x-wp-total'],
       });
-      // UPDATE need to find right format to concat next set of entries
     })
     .catch(function(error) {
-      console.log("getPOSTjson error", error);
-      /* android bug: 'undefined is not an object(evaluating error.response.status)'
-      if (error.response.status === 500) {
-        Alert.alert("Error", "Unable to connect to our server, please try again.");
-      }
-      */
+      Alert.alert("Error", "There was an error loading Post content");
     })
     .done(() => {
       // check X-WP-TOTAL in header to get total # of posts
       console.log("state numPosts", this.state.numPosts);
-      // call api again if needed to pull more in a seperate batch request
       if (this.state.numPosts > pages*perPage) {
         var updatePage = Number(pages)+1;
+        // FLAG call api again if needed to pull more in a seperate batch request
         console.log("call post again", updatePage);
         this.getPOSTjson(updatePage, perPage);
       }
@@ -298,6 +282,14 @@ export default class App extends Component {
       algCount = 0
     }
     return algCount;
+  }
+
+  // some post titles have html string entities and need to be decoded e.g. &#8220; converts to " 
+  parseHtmlEnteties(str) {
+    return str.replace(/&#([0-9]{1,3});/gi, function(match, numStr) {
+        var num = parseInt(numStr, 10); // read num as normal number
+        return String.fromCharCode(num);
+    });
   }
 
   // IMPORTANT: this function needs be called AFTER saving Tag and Category schemas, because we want to integrate these items into the Post schema
@@ -339,7 +331,7 @@ export default class App extends Component {
         // create the schema and add the new post item to storage
         var post = {
             id: item.id,
-            title: item.title.rendered,
+            title: parseHtmlString(item.title.rendered),
             date: _date,
             modified: _mod,
             categories: catList,
@@ -366,7 +358,6 @@ export default class App extends Component {
     }
   }
 
-// <TabNav navigator = {this.props.navigation} />
   render() {
     return <TabNav navigator = {this.props.navigation} />
   }

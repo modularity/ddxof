@@ -1,3 +1,8 @@
+/*
+    This file handles logic and UI for collection of posts that the user has selected as favorites.
+    The UI is FlatList of these posts via name.
+    The data is pulled from the realm storage on the user's device.
+*/
 'use strict';
 import React, { Component } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image } from 'react-native';
@@ -18,48 +23,42 @@ export default class Favorites extends Component {
     this.state = {
       favs: realm.objects('Favorite')
     }
-
+    // put a listener on realm, so that the page can render again as updates happen to the store
     realm.addListener('change', () => {
       this.setState({favs: realm.objects('Favorite')}); // Update state instead of using this.forceUpdate()
     });
-
   }
+  // configuration for TabNav navigation object
   static navigationOptions = {
       header: null
   };
 
+  // when the page is ready to render, send update to firebase
   componentWillMount() {
-    //firebase.analytics().setCurrentScreen('Favorites');
+    firebase.analytics().setCurrentScreen('Favorites');
   }
 
+  // remove realm listener when the page is done
   componentWillUnMount() {
     realm.removeAllListeners();
   }
 
+  // router for navigation to SingleView via Recent StackNavigator with selected item parameter
   routeToContent(_item) {
     const routeToSelection = NavigationActions.navigate({
       routeName: 'SingleView',
       params: { item: _item.posts }
     });
-
-    console.log("route fav item", _item);
     this.props.navigation.dispatch(routeToSelection);
   }
 
-  renderItem = ({item, i}) => (
-    <ListItem
-      onPress={ () => this.routeToContent() }
-      title="okay"
-    />
-  );
-
+  // creates a unique key for each item in the FlatList/VirtualizedList
   _keyExtractor = (item) => item.posts.title.toString();
 
+  // has padding at page top for iOS: StatusBarBackground
+  // FlatList is organized by date the post was saved as a favorite(oldest to most recent)
+  // FlatList is a list of post titles
   render() {
-    var list = ["Hey", "Hello", "Goedemorgan", "Hallo" ];
-    var subCategory = "subCategory";
-    var tag1 = "tag1";
-    var tag2 = "tag2";
     return (
       <View style={{backgroundColor: 'white'}}>
           <StatusBarBackground />
@@ -83,37 +82,3 @@ export default class Favorites extends Component {
     );
   }
 }
-
-/* demo ui render return
-render() {
-  var list = ["Hey", "Hello", "Goedemorgan", "Hallo" ];
-  var subCategory = "subCategory";
-  var tag1 = "tag1";
-  var tag2 = "tag2";
-  return (
-    <View style={{backgroundColor: 'white'}}>
-        <StatusBarBackground />
-        <View style={{paddingLeft: 20, paddingTop: 5, backgroundColor: 'white'}}>
-          <Text style={{padding: 2, width: 48, backgroundColor: 'black', color: 'white', fontSize: 14}}>ddxof:</Text>
-          <Text style={{fontSize: 30}}>Favorites</Text>
-        </View>
-        <List>
-          <FlatList
-            data={ list }
-            keyExtractor={ this._keyExtractor}
-            renderItem={({item, separators}) => (
-              <View style={{justifyContent: 'center', alignItems: 'center', padding: 20}}>
-                <Text style={{color: '#979797', fontSize: 12}}>{subCategory.toUpperCase()} | {tag1.toUpperCase()}, {tag2.toUpperCase()}</Text>
-                <Text style={{color: '#E00000', fontSize: 20}}>Selected Category</Text>
-                <TouchableOpacity onPress={ () => this.routeToContent(item) }>
-                  <Image style={{width: 350, height: 250, borderWidth: 5, borderRadius: 5, borderColor: '#979797'}}
-                         source={{uri: 'https://facebook.github.io/react/img/logo_og.png'}}
-                  />
-                </TouchableOpacity>
-              </View>
-            )}
-          />
-        </List>
-  </View>
-  );
-  */

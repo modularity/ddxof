@@ -1,4 +1,8 @@
-//const Realm = require('realm');
+/*
+    This file houses the realm configurations need to facilitate app storage.
+    Schemas: Post, Category, Tag, Timestamp, Favorite
+    If changes need to made to this structure, be sure to increment the schemaVersion and review all realm use in the app.
+*/
 import Realm from 'realm';
 
 class Post extends Realm.Object {}

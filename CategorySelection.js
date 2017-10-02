@@ -1,3 +1,8 @@
+/*
+    This file handles logic and UI for a selected category item from Categories.
+    The UI is a FlatList of relevant results for the selected item.
+    The data is pulled from the realm storage on the user's device.
+*/
 'use strict';
 import React, { Component } from 'react';
 import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
@@ -9,19 +14,18 @@ import StatusBarBackground from './StatusBarBackground';
 // realm import for json storage and use
 import realm from './Realm';
 
-// will pass reference to list to render via props: categoryName
 export default class CategorySelection extends Component {
   constructor(props) {
     super(props);
+    // recieve navigation param of selected item
     var page_obj = this.props.navigation.state.params.catItem;
-    console.log("category selection item from params", page_obj);
     this.state = {
       catObj: page_obj,
       posts: realm.objects('Post'),
-      //list: ['a', 'b', 'c', 'd'],
     };
   }
 
+  // configuration needed for StackNavigator navigation object
   static navigationOptions = ({ navigation }) => {
     const {state, setParams} = navigation;
       return {
@@ -30,20 +34,12 @@ export default class CategorySelection extends Component {
     };
   };
 
-  componentWillMount() {
-    // placeholder
-  }
-
-  // routes to SingleView with item obj param
+  // router for navigation to SingleView via Categories StackNavigator with selected item parameter
   routeToContent(_item) {
-    console.log("selection made");
-
     const routeToSelection = NavigationActions.navigate({
       routeName: 'SingleView',
       params: { item: _item }
     });
-
-    console.log("CategorySelection route item " + _item );
     this.props.navigation.dispatch(routeToSelection);
 
   }
@@ -87,33 +83,32 @@ export default class CategorySelection extends Component {
     return headerText
   }
 
+  // create a unique key for each item in the FlatList/VirtualizedList
   _keyExtractor = (item) => item.title.toString();
 
-  checkImageLinks(item) {
-    if (item.algorithm_url === '') {
-      console.log("empty url string for "+item.title+" "+item.algorithm_url+" "+item.id, item);
-    }
+  // handle image errors for Image Component via onError callback
+  // utitlize image cache busting technique of appending time param to the image url
+  imageError(error, item) {
+    // FLAG
+    console.log("cat image error ", error);
+    console.log("cat image ref", item);
+    //update url with cache busting technique
+    var src = item.algorithm_url + "?" + new Date().getTime();
+    console.log("update cat img source", src);
+    realm.write(() => {
+        item.algorithm_url = src;
+    });
   }
 
-  imageError(error, src) {
-    //var url = src.uri;
-    console.log("recent image "+src+" error "+ error);
-    //this.setState({uri: url});
-  }
-
+  // has padding at page top for iOS: StatusBarBackground
+  // FlatList is list of posts related to the selected category
+  // header added to each post in the FlatList with relevant tags and categories
+  // posts with multiple algorithm images have badge overlay
   render() {
-    // need to look through all posts with this category id
-    // in state is the category object that was selected on the last page
-    // need to find all posts that have this category
     var results = realm.objects('Post').filtered('categories == $0', this.state.catObj);
+    // FLAG
     console.log("render results", results[0]);
     console.log("render results len", results.length);
-// need to change the approach for queries
-// initially have category object: id, name, count, parent
-// need to find posts related to results
-// quick implementation would be to query https://ddxof.com/wp-json/wp/v2/posts?categories=103
-// parse response of item: title, category(id), tag(id)
-// alt approach: parse existing store, check all posts with category.id match
     var _width = Dimensions.get('window').width*.9;
     return (
       <View style={{flex: 1, backgroundColor: 'white'}}>
@@ -126,11 +121,10 @@ export default class CategorySelection extends Component {
                 <View style={{justifyContent: 'center', alignItems: 'center', padding: 20}}>
                   <Text style={{color: '#979797', fontSize: 12}}>{ this.itemHeader(item) }</Text>
                   <Text style={{color: '#E00000', fontSize: 20}}>{item.title}</Text>
-                  { this.checkImageLinks(item) }
                   <TouchableOpacity onPress={ () => this.routeToContent(item) }>
                     <Image style={{width: _width, height: 250, borderWidth: 5, borderRadius: 5, borderColor: '#979797'}}
                            source={{uri: item.algorithm_url}}
-                           onError={ (error, source) => this.imageError(error, source) }/>
+                           onError={ (error) => this.imageError(error, item) }/>
                    {item.algCount > 1 ? <View style={{marginTop: -30, justifyContent: 'flex-start', alignItems: 'center'}}>
                                         <Badge containerStyle={{width: 35, backgroundColor: '#3678a0'}}
                                           value={item.algCount}
@@ -146,28 +140,3 @@ export default class CategorySelection extends Component {
     );
   }
 }
-
-/*
-// render items related to category
-// top line text(grey): child categories | tag1, tag2 ...
-// second line text(red): name of item
-// image with grey border width 2
-_renderItem( _item, _i) {
-  var subCategory = "subCategory";
-  var tag1 = "tag1";
-  var tag2 = "tag2";
-  console.log("item", _item);
-  return (
-    <View style={{justifyContent: 'center', alignItems: 'center'}}>
-      <Text style={{color: '#979797', fontSize: 12}}>{subCategory.toUpperCase()} | {tag1.toUpperCase()}, {tag2.toUpperCase()}</Text>
-      <Text style={{color: '#E00000', fontSize: 20}}>Selected Category</Text>
-      <TouchableOpacity onPress={ () => console.log("okay") }>
-        <Image
-          style={{width: 350, height: 250, borderWidth: 5, borderRadius: 5, borderColor: '#979797'}}
-          source={{uri: 'https://facebook.github.io/react/img/logo_og.png'}}
-        />
-      </TouchableOpacity>
-    </View>
-  );
-}
-*/

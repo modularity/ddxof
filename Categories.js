@@ -1,6 +1,11 @@
+/*
+    This file handles the logic and UI for the Catgories page.
+    The UI is a FlatList of category names and a badge with it's count.
+    The data is pulled from the realm storage on the user's device.
+*/
 'use strict';
 import React, { Component } from 'react';
-import { View, Text, FlatList } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator } from 'react-native';
 import { TabNavigator, NavigationActions } from 'react-navigation';
 // UI imports
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -18,36 +23,37 @@ export default class Categories extends Component {
       cat: realm.objects('Category'),
       catSorted: [],
       realmCat: 0,
+      isLoading: true,
     };
-    console.log("cat props", props);
 
+    // put a listener on realm, so that the page can render again as updates happen to the store
     realm.addListener('change', () => {
       this.setState({cat: realm.objects('Category')});
       this.sortCatList();
     });
 
   }
+  // configuration needed for the TabNav navigation object
   static navigationOptions = {
       header: null
   };
 
+  // when the page is ready to render, send update to firebase and sort the realm storage
   componentWillMount() {
     firebase.analytics().setCurrentScreen('Categories');
     this.sortCatList();
   }
 
+  // remove realm listener when the page is done
   componentWillUnMount() {
     realm.removeAllListeners();
   }
 
+  // have list with properties: id, name, count, parent
+  // need to reorder with a hierarchy structure(parent and child categories) to format and display
+  // can check if parent: 0 then it's a main cat, then need to group children with that main cat
   sortCatList() {
-    // have list with properties: id, name, count, parent
-    // need to reorder with the hierarchy structure to display and format
-    // can check if parent: 0 then it's a main cat
-    // then need to group children with that main cat
     var sortedCat = [];
-
-    console.log("len cat", this.state.cat.length);
     this.state.cat.map((item) => {
       if (item.parent === 0) {
         sortedCat.push(item);
@@ -56,41 +62,30 @@ export default class Categories extends Component {
         })
       }
     })
-    this.setState({ catSorted: sortedCat });
-
+    this.setState({ catSorted: sortedCat, isLoading: false });
   }
 
+  // router for navigation to subCategory page: CategorySelection via StackNavigator with selected item parameter
   routeToContent(_item) {
     const routeToSelection = NavigationActions.navigate({
       routeName: 'CategorySelection',
       params: { catItem: _item }
     });
-
-    console.log(_item);
+    // console.log(_item);
     this.props.navigation.dispatch(routeToSelection);
   }
 
-  renderItem = ({item, i}) => (
-    <ListItem
-      onPress={ () => this.routeToContent(item) }
-      title={ item.parent === 0 ? item.name : "    " + item.name }
-      titleStyle={{color: '#E00000'}}
-      badge={{ value: item.count, textStyle: { color: '#979797' }, containerStyle: { backgroundColor: '#fff' } }}
-    />
-  );
-
+  // creates a unique key for each item in the FlatList/VirtualizedList
   _keyExtractor = (item) => item.name.toString();
 
+  // has padding at page top for iOS: StatusBarBackground
+  // includes ActivityIndicator when content isn't ready to be rendered yet
+  // FlatList is organized by parent and child categories with badge counts
   render() {
-    /*
-    //<SpinnerOverlay text={'Loading...'}/>
-    if (!this.state.catSorted) {
-      return <Text> Loading ... </Text>
-    }
-    */
     return (
       <View style={{flex: 1, backgroundColor: 'white'}}>
           <StatusBarBackground />
+          { this.state.isLoading ?  <ActivityIndicator style={{padding: 20}} /> : null }
           <View style={{paddingLeft: 20, paddingTop: 5, backgroundColor: 'white'}}>
             <Text style={{padding: 2, width: 48, backgroundColor: 'black', color: 'white', fontSize: 14}}>ddxof:</Text>
             <Text style={{fontSize: 30}}>Categories</Text>
@@ -98,8 +93,16 @@ export default class Categories extends Component {
           <List>
             <FlatList
               data={ this.state.catSorted }
-              renderItem = { this.renderItem }
               keyExtractor={ this._keyExtractor }
+              renderItem = { this.renderItem }
+              renderItem={({item}) => (
+                <ListItem
+                  onPress={ () => this.routeToContent(item) }
+                  title={ item.parent === 0 ? item.name : "    " + item.name }
+                  titleStyle={{color: '#E00000'}}
+                  badge={{ value: item.count, textStyle: { color: '#979797' }, containerStyle: { backgroundColor: '#fff' } }}
+                />
+              )}
               />
           </List>
       </View>
