@@ -95,13 +95,12 @@ export default class Recent extends Component {
   // utitlize image cache busting technique of appending time param to the image url
   // to have it trigger render need to update realm storage with the change
   // then the realm listener will trigger render to run again since state changed
+  // add to Image in render(): onError={(error) => this.imageError(error, item) }
   imageError(error, item) {
-    // FLAG
-    console.log("recent image error ", error);
-    console.log("recent image ref", item);
+    // FLAG console.log("recent image error ", error); console.log("recent image ref", item);
     //update url with cache busting technique
     var src = item.algorithm_url + "?" + new Date().getTime();
-    console.log("update source", src);
+    //console.log("update source", src);
     realm.write(() => {
         item.algorithm_url = src;
     });
@@ -113,15 +112,16 @@ export default class Recent extends Component {
   // header added to each post in the FlatList with relevant tags and categories
   // posts with multiple algorithm images have badge overlay
   render() {
+    // { this.state.isLoading ? <ActivityIndicator style={{padding: 20}} /> : null }
     var _width = Dimensions.get('window').width*.9;
     return (
       <View style={{flex: 1, backgroundColor: 'white'}}>
           <StatusBarBackground />
-          { this.state.isLoading ?  <ActivityIndicator style={{padding: 20}} /> : null }
           <View style={{paddingLeft: 20, backgroundColor: 'white'}}>
             <Text style={{padding: 2, width: 48, backgroundColor: 'black', color: 'white', fontSize: 14}}>ddxof:</Text>
             <Text style={{fontSize: 30}}>Recent</Text>
           </View>
+
           <List>
             <FlatList
               data={ this.state.recent }
@@ -132,8 +132,7 @@ export default class Recent extends Component {
                   <Text style={{color: '#E00000', fontSize: 20}}>{item.title}</Text>
                   <TouchableOpacity onPress={ () => this.routeToContent(item) }>
                     <Image style={{width: _width, height: 250, borderWidth: 5, borderRadius: 5, borderColor: '#979797'}}
-                           source={{uri: item.algorithm_url}}
-                           onError={(error) => this.imageError(error, item) }/>
+                           source={{uri: item.algorithm_url}} />
                    {item.algCount > 1 ? <View style={{marginTop: -30, justifyContent: 'flex-start', alignItems: 'center'}}>
                                         <Badge containerStyle={{width: 35, backgroundColor: '#3678a0'}}
                                           value={item.algCount}

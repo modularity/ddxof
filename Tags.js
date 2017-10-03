@@ -25,7 +25,7 @@ export default class Tags extends Component {
     };
     // put a listener on realm, so that the page can render again as updates happen to the store
     realm.addListener('change', () => {
-      this.setState({tags: realm.objects('Tag')});
+      this.setState({tags: realm.objects('Tag'), isLoading: false});
     });
 
   }
@@ -60,28 +60,28 @@ export default class Tags extends Component {
   // includes ActivityIndicator when content isn't ready to be rendered yet
   // FlatList is organized by parent and child categories with badge counts
   render() {
-      return (
-        <View style={{flex: 1, backgroundColor: 'white'}}>
-            <StatusBarBackground />
-            <View style={{paddingLeft: 20, paddingTop: 5, backgroundColor: 'white'}}>
-              <Text style={{padding: 2, width: 48, backgroundColor: 'black', color: 'white', fontSize: 14}}>ddxof:</Text>
-              <Text style={{fontSize: 30}}>Tags</Text>
-            </View>
-          <List>
-            <FlatList
-              data={ this.state.tags }
-              keyExtractor={ this._keyExtractor }
-              renderItem={({item}) => (
-                <ListItem
-                  onPress={ () => this.routeToContent(item) }
-                  title={ item.parent === 0 ? item.name : "    " + item.name }
-                  titleStyle={{color: '#E00000'}}
-                  badge={{ value: item.count, textStyle: { color: '#979797' }, containerStyle: { backgroundColor: '#fff' } }}
+    return (
+      <View style={{flex: 1, backgroundColor: 'white'}}>
+          <StatusBarBackground />
+          <View style={{paddingLeft: 20, paddingTop: 5, backgroundColor: 'white'}}>
+            <Text style={{padding: 2, width: 48, backgroundColor: 'black', color: 'white', fontSize: 14}}>ddxof:</Text>
+            <Text style={{fontSize: 30}}>Tags</Text>
+          </View>
+        <List>
+          <FlatList
+            data={ this.state.tags }
+            keyExtractor={ this._keyExtractor }
+            renderItem={({item}) => (
+              <ListItem
+                onPress={ () => this.routeToContent(item) }
+                title={ item.parent === 0 ? item.name : "    " + item.name }
+                titleStyle={{color: '#E00000'}}
+                badge={{ value: item.count, textStyle: { color: '#979797' }, containerStyle: { backgroundColor: '#fff' } }}
                 />
               )}
-              />
+            />
           </List>
-  </View>
+      </View>
     );
   }
 }

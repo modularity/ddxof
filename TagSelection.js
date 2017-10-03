@@ -90,12 +90,10 @@ export default class TagSelection extends Component {
   // handles image errors for Image Component via onError callback
   // utitlize image cache busting technique of appending time param to the image url
   imageError(error, item) {
-    // FLAG
-    console.log("tag image error ", error);
-    console.log("tag image ref", item);
+    // FLAG console.log("tag image error ", error); console.log("tag image ref", item);
     //update url with cache busting technique
     var src = item.algorithm_url + "?" + new Date().getTime();
-    console.log("update tag img source", src);
+    //console.log("update tag img source", src);
     realm.write(() => {
         item.algorithm_url = src;
     });
@@ -108,7 +106,7 @@ export default class TagSelection extends Component {
   render() {
     var item = this.state.tagObj;
     var results = realm.objects('Post').filtered('tags == $0', item);
-    console.log("num of results by tag", results.length);
+    // console.log("num of results by tag", results.length);
     var _width = Dimensions.get('window').width*.9;
     return (
       <View>
@@ -121,11 +119,9 @@ export default class TagSelection extends Component {
                 <View style={{justifyContent: 'center', alignItems: 'center', padding: 20}}>
                   <Text style={{color: '#979797', fontSize: 12}}>{ this.itemHeader(item) }</Text>
                   <Text style={{color: '#E00000', fontSize: 20}}>{item.title}</Text>
-                  { this.checkImageLinks(item) }
                   <TouchableOpacity onPress={ () => this.routeToContent(item) }>
                     <Image style={{width: _width, height: 250, borderWidth: 5, borderRadius: 5, borderColor: '#979797'}}
-                           source={{uri: item.algorithm_url}}
-                           onError={ (error) => this.imageError(error, item) }/>
+                           source={{uri: item.algorithm_url}} />
                    {item.algCount > 1 ? <View style={{marginTop: -30, justifyContent: 'flex-start', alignItems: 'center'}}>
                                         <Badge containerStyle={{width: 35, backgroundColor: '#3678a0'}}
                                           value={item.algCount}

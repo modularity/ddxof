@@ -177,10 +177,10 @@ export default class CategorySelection extends Component {
   // when an image tab is pressed, update state with new index and imageSrc to trigger render()
   pressMultiTab(link, i) {
     var _i = i+1;
-    var updateImg = {uri: this.state.imageLinks[i]};
-    // FLAG
-    console.log("selected multitab image index", _i);
-    console.log("update image link", updateImg);
+    var imgSrc = this.state.imageLinks[i];
+    var updateImg = {uri: imgSrc};
+
+    // FLAG console.log("selected multitab image index", _i); console.log("update image link", imgSrc);
     this.setState({imageIndex: i, imageSrc: updateImg});
   }
 
@@ -257,7 +257,7 @@ export default class CategorySelection extends Component {
   // then update state with the new file location
   saveImagesToFile() {
     var imgs = this.state.imageLinks;
-    console.log("image link state", imgs);
+    // console.log("image link state", imgs);
     var cacheCount = this.state.imageCacheCount;
     //var img = this.state.imageLinks[i];
     //console.log("image link state", img);
@@ -271,24 +271,23 @@ export default class CategorySelection extends Component {
             //some headers ..
           })
           .progress((received, total) => {
-              console.log('progress', received / total);
+              //console.log('progress', received / total);
           })
           .then((res) => {
             // the temp file path with file extension `png`
             // note that when using a file path as Image source on Android, must prepend "file://"" before the file path
             if (res.info().status == 200) {
               imgs[i] = Platform.OS === 'android' ? 'file://' + res.path() : '' + res.path()
-              console.log("file saved to ", imgs[i]);
+              //console.log("file saved to ", imgs[i]);
               // increment image cache count, flag for tracking completion of caching all images
               cacheCount = cacheCount+1;
-              console.log("cacheCount", cacheCount);
+              //console.log("cacheCount", cacheCount);
             }
             this.setState({imageLinks: imgs, imageCacheCount: cacheCount});
           })
           .catch((errorMessage, statusCode) => {
-            console.log("error for "+url+" with code "+ statusCode);
-            console.log("error msg", errorMessage);
-
+            //console.log("error for "+url+" with code "+ statusCode);
+            //console.log("error msg", errorMessage);
         })
     })
     this.checkandupdatefavorite();
@@ -298,26 +297,21 @@ export default class CategorySelection extends Component {
   // pass image source as a parameter because some pages render multiple images per post and so the state variable for source can change
   // display an error message to the user and render a button for them to retry the image
   imageError(src) {
-      console.log("image error for ", src);
+      //console.log("image error for ", src);
       this.setState({ renderImageError: true });
   }
 
   reloadImage() {
-      var src = this.state.imageSrc+" ";
-      console.log("reload the image to ", src);
+      var src = this.state.imageSrc + "?" + new Date().getTime();
+      //console.log("reload the image to ", src);
       this.setState({ renderImageError: false, imageSrc: src });
   }
-
-  _onLoadEnd = (event) => {
-      console.log('_onLoadEnd', event.nativeEvent);
-  };
 
   // loads full screen image with pan and zoom functionality
   // bottom tab bar to share, favorite and view full text
   // for posts with mulitiple algorithm images: there is a set of buttons to toggle between them
   render() {
     var images = this.state.imageLinks;
-    //console.log("image index "+this.state.imageIndex+" render image link "+images[this.state.imageIndex]);
     var _width = Dimensions.get('window').width;
     var _height = Dimensions.get('window').height;
     if (this.state.renderWebView) {
@@ -329,7 +323,7 @@ export default class CategorySelection extends Component {
         />
       );
     } else if (!this.state.renderImageError) {
-      console.log("image src", this.state.imageSrc);
+      // FLAG console.log("image src", this.state.imageSrc);
       return (
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
             <StatusBarBackground style={{backgroundColor: 'transparent'}} />
@@ -340,11 +334,12 @@ export default class CategorySelection extends Component {
               minimumZoomScale={1}
               maximumZoomScale={7}
               androidScaleType="center"
-              onLoadEnd={this._onLoadEnd}
               onError={ () => this.imageError(this.state.imageSrc) }
               style={{width: _width, height: _height }} />
             </View>
-          <View style={{position: 'absolute', bottom: 40, backgroundColor: 'transparent'}}>{ this.createMultiTab() }</View>
+          <View style={{position: 'absolute', bottom: 40, backgroundColor: 'transparent'}}>
+            { this.createMultiTab() }
+          </View>
           <View style={{position: 'absolute', left: 0, right: 0, bottom: 0, flexDirection: 'row', justifyContent: 'space-between'}}>
             <Icon.Button name="share" backgroundColor='transparent' color="#979797"
                          onPress={() => this.shareContent()}>
@@ -369,7 +364,9 @@ export default class CategorySelection extends Component {
               The image failed to load
             </Icon.Button>
           </View>
-        <View style={{position: 'absolute', bottom: 40, backgroundColor: 'transparent'}}>{ this.createMultiTab() }</View>
+        <View style={{position: 'absolute', bottom: 40, backgroundColor: 'transparent'}}>
+          { this.createMultiTab() }
+        </View>
         <View style={{position: 'absolute', left: 0, right: 0, bottom: 0, flexDirection: 'row', justifyContent: 'space-between'}}>
           <Icon.Button name="share" backgroundColor='transparent' color="#979797"
                        onPress={() => this.shareContent()}>

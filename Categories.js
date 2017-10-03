@@ -85,11 +85,11 @@ export default class Categories extends Component {
     return (
       <View style={{flex: 1, backgroundColor: 'white'}}>
           <StatusBarBackground />
-          { this.state.isLoading ?  <ActivityIndicator style={{padding: 20}} /> : null }
           <View style={{paddingLeft: 20, paddingTop: 5, backgroundColor: 'white'}}>
             <Text style={{padding: 2, width: 48, backgroundColor: 'black', color: 'white', fontSize: 14}}>ddxof:</Text>
             <Text style={{fontSize: 30}}>Categories</Text>
           </View>
+          { this.state.isLoading ?  <ActivityIndicator style={{padding: 20}} /> : null }
           <List>
             <FlatList
               data={ this.state.catSorted }

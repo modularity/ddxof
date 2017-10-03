@@ -42,6 +42,7 @@ export default class App extends Component {
     // check the initialization requirements for app when it loads
     this.checkInit();
 
+/*
     // FLAG
     // hide yellow warning errors
     console.ignoredYellowBox = ["Warning: flattenChildren",
@@ -59,6 +60,7 @@ export default class App extends Component {
       console.error = function () {}
       console.debug = function () {}
     }
+    */
   }
 
   // this function evaluates if the app needs initialization data from the WP REST API
@@ -76,21 +78,18 @@ export default class App extends Component {
         });
       })
       var time = realm.objects('Timestamp');
-      // FLAG first instance of application
-      console.log("init of application, timestamp len", time.length);
+      // FLAG first instance of application console.log("init of application, timestamp len", time.length);
       this.getCategoryjson(1, 100);
       this.getTagjson(1, 100);
       this.getPOSTjson(1, 100);
     } else {
       var lastCheck = realm.objects('Timestamp')[0].date;
-      // FLAG not the first instance of the application
-      console.log("not app init, last timestamp", lastCheck);
+      // FLAG not the first instance of the application console.log("not app init, last timestamp", lastCheck);
       // check if two weeks since last api pull, if so update db
       var today = moment();
       var timeBtw = Math.abs(today.diff(lastCheck, 'days'));
       if ( timeBtw > 14 ) {
-        // FLAG
-        console.log("old cache, update content");
+        // FLAG console.log("old cache, update content");
         realm.write(() => {
           // delete old storage
           let allPosts = realm.objects('Post');
@@ -142,12 +141,10 @@ export default class App extends Component {
       Alert.alert("Error", "There was an error loading category content.");
     })
     .done(() => {
-      // FLAG check X-WP-TOTAL in header to get total # of categories
-      console.log("state numCats", this.state.numCats);
+      // FLAG check X-WP-TOTAL in header to get total # of categories console.log("state numCats", this.state.numCats);
       if (this.state.numCats > pages*perPage) {
         var updatePage = Number(pages)+1;
-        // FLAG call api again if needed to pull more in a seperate batch request
-        console.log("call cat again", updatePage);
+        // FLAG call api again if needed to pull more in a seperate batch request console.log("call cat again", updatePage);
         this.getCategoryjson(updatePage, perPage);
       }
       this.saveCattoRealm();
@@ -198,12 +195,10 @@ export default class App extends Component {
       Alert.alert("Error", "There was an error loading Tag content");
     })
     .done(() => {
-      // FLAG check X-WP-TOTAL in header to get total # of tags
-      console.log("state numTags", this.state.numTags);
+      // FLAG check X-WP-TOTAL in header to get total # of tags console.log("state numTags", this.state.numTags);
       if (this.state.numTags > pages*perPage) {
         var updatePage = Number(pages)+1;
-        // FLAG call api again if needed to pull more in a seperate batch request
-        console.log("call tag again", updatePage);
+        // FLAG call api again if needed to pull more in a seperate batch request console.log("call tag again", updatePage);
         this.getTagjson(updatePage, perPage);
       }
       this.saveTagtoRealm();
@@ -251,12 +246,10 @@ export default class App extends Component {
       Alert.alert("Error", "There was an error loading Post content");
     })
     .done(() => {
-      // check X-WP-TOTAL in header to get total # of posts
-      console.log("state numPosts", this.state.numPosts);
+      // FLAG check X-WP-TOTAL in header to get total # of posts console.log("state numPosts", this.state.numPosts);
       if (this.state.numPosts > pages*perPage) {
         var updatePage = Number(pages)+1;
-        // FLAG call api again if needed to pull more in a seperate batch request
-        console.log("call post again", updatePage);
+        // FLAG call api again if needed to pull more in a seperate batch request console.log("call post again", updatePage);
         this.getPOSTjson(updatePage, perPage);
       }
       this.savePosttoRealm();
@@ -284,8 +277,8 @@ export default class App extends Component {
     return algCount;
   }
 
-  // some post titles have html string entities and need to be decoded e.g. &#8220; converts to " 
-  parseHtmlEnteties(str) {
+  // some post titles have html string entities and need to be decoded e.g. &#8220; converts to "
+  parseHtmlString(str) {
     return str.replace(/&#([0-9]{1,3});/gi, function(match, numStr) {
         var num = parseInt(numStr, 10); // read num as normal number
         return String.fromCharCode(num);
@@ -331,7 +324,7 @@ export default class App extends Component {
         // create the schema and add the new post item to storage
         var post = {
             id: item.id,
-            title: parseHtmlString(item.title.rendered),
+            title: this.parseHtmlString(item.title.rendered),
             date: _date,
             modified: _mod,
             categories: catList,

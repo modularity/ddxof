@@ -89,12 +89,10 @@ export default class CategorySelection extends Component {
   // handle image errors for Image Component via onError callback
   // utitlize image cache busting technique of appending time param to the image url
   imageError(error, item) {
-    // FLAG
-    console.log("cat image error ", error);
-    console.log("cat image ref", item);
+    // FLAG console.log("cat image error ", error); console.log("cat image ref", item);
     //update url with cache busting technique
     var src = item.algorithm_url + "?" + new Date().getTime();
-    console.log("update cat img source", src);
+    // console.log("update cat img source", src);
     realm.write(() => {
         item.algorithm_url = src;
     });
@@ -106,9 +104,7 @@ export default class CategorySelection extends Component {
   // posts with multiple algorithm images have badge overlay
   render() {
     var results = realm.objects('Post').filtered('categories == $0', this.state.catObj);
-    // FLAG
-    console.log("render results", results[0]);
-    console.log("render results len", results.length);
+    // FLAG console.log("render results", results[0]); console.log("render results len", results.length);
     var _width = Dimensions.get('window').width*.9;
     return (
       <View style={{flex: 1, backgroundColor: 'white'}}>
@@ -123,8 +119,7 @@ export default class CategorySelection extends Component {
                   <Text style={{color: '#E00000', fontSize: 20}}>{item.title}</Text>
                   <TouchableOpacity onPress={ () => this.routeToContent(item) }>
                     <Image style={{width: _width, height: 250, borderWidth: 5, borderRadius: 5, borderColor: '#979797'}}
-                           source={{uri: item.algorithm_url}}
-                           onError={ (error) => this.imageError(error, item) }/>
+                           source={{uri: item.algorithm_url}} />
                    {item.algCount > 1 ? <View style={{marginTop: -30, justifyContent: 'flex-start', alignItems: 'center'}}>
                                         <Badge containerStyle={{width: 35, backgroundColor: '#3678a0'}}
                                           value={item.algCount}

@@ -35,7 +35,6 @@ export default class Search extends Component {
 
   // router for naviation to SingleView via StackNavigator with selected item parameter
   routeToContent(_item) {
-    console.log("route search result to view");
     const routeToSelection = NavigationActions.navigate({
       routeName: 'SingleView',
       params: { item: _item}
@@ -47,9 +46,7 @@ export default class Search extends Component {
   // for simplicity and speed of results, only query post titles that have similar text
   checkForPage(text) {
     var postResult = realm.objects('Post').filtered('title CONTAINS $0', text);
-    // FLAG
-    console.log("post result", postResult[0]);
-    console.log("post len", postResult.length);
+    // FLAG console.log("post result", postResult[0]); console.log("post len", postResult.length);
 /*
     // could add query results for Category and Tags in the future
     // recommend to add UI element to the let the user toggle between these query types
@@ -133,12 +130,10 @@ export default class Search extends Component {
   // handles image error for Image Component via onError callback
   // utilize image cache busting technique of appending time param to the image url
   imageError(error, item) {
-    // FLAG
-    console.log("recent image error ", error);
-    console.log("recent image ref", item);
+    // FLAG console.log("recent image error ", error); console.log("recent image ref", item);
     //update url with cache busting technique
     var src = item.algorithm_url + "?" + new Date().getTime();
-    console.log("update source", src);
+    //console.log("update source", src);
     realm.write(() => {
         item.algorithm_url = src;
     });
@@ -172,8 +167,7 @@ export default class Search extends Component {
                     <Text style={{color: '#E00000', fontSize: 20}}>{item.title}</Text>
                     <TouchableOpacity onPress={ () => this.routeToContent(item) }>
                       <Image style={{width: _width, height: 250, borderWidth: 5, borderRadius: 5, borderColor: '#979797'}}
-                             source={{uri: item.algorithm_url}}
-                             onError={ (error) => this.imageError(error, item) }/>
+                             source={{uri: item.algorithm_url}} />
                      {item.algCount > 1 ? <View style={{marginTop: -30, justifyContent: 'flex-start', alignItems: 'center'}}>
                                           <Badge containerStyle={{width: 35, backgroundColor: '#3678a0'}}
                                             value={item.algCount}
