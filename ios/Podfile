@@ -1,0 +1,50 @@
+# Uncomment the next line to define a global platform for your project
+# platform :ios, '9.0'
+
+target 'ddxof' do
+  # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
+  # use_frameworks!
+
+  # Pods for ddxof
+  pod 'Firebase/Core'
+  pod 'RNFirebase', :path => '../node_modules/react-native-firebase'
+
+  pod "Yoga", :path => "../node_modules/react-native/ReactCommon/yoga"
+  pod 'React', :path => '../node_modules/react-native', :subspecs => [
+    'BatchedBridge', # required for react-native 0.45.0+
+    'Core', # add any other subspecs you want to use in your project
+    'RCTAnimation',
+    'RCTActionSheet',
+    'RCTGeolocation',
+    'RCTImage',
+    'RCTLinkingIOS',
+    'RCTNetwork',
+    'RCTSettings',
+    'RCTText',
+    'RCTVibration',
+    'RCTWebSocket',
+  ]
+
+
+
+  target 'ddxof-tvOSTests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+  target 'ddxofTests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+end
+
+#Also add this at the very bottom of your Podfile
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    if target.name == "React"
+      target.remove_from_project
+    end
+  end
+end
