@@ -26,7 +26,7 @@ Developer: Lauren Dunlap, Programmer Analyst III @ UCLA HEALTH
 
 ///////////////////////////////////////////////////////////////////////////////
 
-INSTALLATION:
+# INSTALLATION:
 
 1. Follow instructions to setup a React-Native project environment with Native Code.
       https://facebook.github.io/react-native/docs/getting-started.html
@@ -50,8 +50,8 @@ INSTALLATION:
 8. To trail device logs, run 'react-native log-android' or 'react-native log-ios'
 
 
-BUILD OFFLINE BUNDLE FOR iOS:
-      This will allow for testing on actual iPhones and iPads without TestFlight or the App Store
+# BUILD OFFLINE BUNDLE FOR iOS:
+This will allow for testing on actual iPhones and iPads without TestFlight or the App Store
 
 1. Update Xcode scheme for project
        Product -> Scheme -> Edit Scheme -> Run -> Info -> Build Configuration -> Release
@@ -61,7 +61,7 @@ BUILD OFFLINE BUNDLE FOR iOS:
 3. Finally clean and rebuild the project. A node server will still open up to build the project.
         Note can also run 'react-native run-ios --variant=release'
 
-SUBMIT RELEASE BUILD TO APP STORE:
+# SUBMIT RELEASE BUILD TO APP STORE:
 
 1. Update Xcode scheme for project
        Product -> Scheme -> Edit Scheme -> Run -> Info -> Build Configuration -> Release
@@ -83,7 +83,7 @@ SUBMIT RELEASE BUILD TO APP STORE:
 8. The new binary will become available in iTunesConnect.
 
 
-BUILD OFFLINE BUNDLE FOR ANDROID(Signed APK):
+# BUILD OFFLINE BUNDLE FOR ANDROID(Signed APK):
 
 1. Follow the guidelines for generating a signing key, setting up gradle variables and add signing config to gradle
       https://facebook.github.io/react-native/docs/signed-apk-android.html
@@ -94,7 +94,7 @@ BUILD OFFLINE BUNDLE FOR ANDROID(Signed APK):
 3. Run 'react-native run-android --variant=release'
 
 
-SUBMIT SIGNED APK TO GOOGLE PLAY CONSOLE:
+# SUBMIT SIGNED APK TO GOOGLE PLAY CONSOLE:
 
 1. Generate signed APK file
 
