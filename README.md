@@ -22,12 +22,10 @@ Support URL: https://ddxof.com/app/
 
 Copyright: Dr. Tom Fadial
 
-Developer: Lauren Dunlap, Programmer Analyst III @ UCLA HEALTH
+App Developer: Lauren Dunlap, Programmer Analyst III, CTRL | DGIT | David Geffen School of Medicine at UCLA
 
-///////////////////////////////////////////////////////////////////////////////
-
-# INSTALLATION:
-
+##INSTALLATION:
+```
 1. Follow instructions to setup a React-Native project environment with Native Code.
       https://facebook.github.io/react-native/docs/getting-started.html
 
@@ -37,22 +35,22 @@ Developer: Lauren Dunlap, Programmer Analyst III @ UCLA HEALTH
 
 4. Run 'react-native link'
 
-5. Run 'react-native unlink react-native-firebase' because Firebase requires manual configuration.
+5. Run 'react-native unlink react-native-firebase' because Firebase@2.x.x requires manual configuration.
 
 6. Configure firebase within the project. This includes configuring cocoapods for iOS.
       Note that the Xcode project should be opened under the .xcworkspace extension file
       https://invertase.io/react-native-firebase/#/v2/initial-setup
 
-7. Review and update as needed: iOS certificates, firebase files: google-services.json and googleservice-info.plist
+7. Add project configurations: iOS certificates, firebase files: google-services.json and googleservice-info.plist
 
 7. Connect a physical device via USB or open an emulator, then run either 'react-native run-android' or 'react-native run-ios' to run on an emulator or device.
 
 8. To trail device logs, run 'react-native log-android' or 'react-native log-ios'
+```
 
-
-# BUILD OFFLINE BUNDLE FOR iOS:
-This will allow for testing on actual iPhones and iPads without TestFlight or the App Store
-
+##BUILD OFFLINE BUNDLE FOR iOS:
+      This will allow for testing on actual iPhones and iPads without TestFlight or the App Store
+```
 1. Update Xcode scheme for project
        Product -> Scheme -> Edit Scheme -> Run -> Info -> Build Configuration -> Release
 
@@ -60,9 +58,11 @@ This will allow for testing on actual iPhones and iPads without TestFlight or th
 
 3. Finally clean and rebuild the project. A node server will still open up to build the project.
         Note can also run 'react-native run-ios --variant=release'
+```
 
-# SUBMIT RELEASE BUILD TO APP STORE:
+##SUBMIT RELEASE BUILD TO APP STORE:
 
+```
 1. Update Xcode scheme for project
        Product -> Scheme -> Edit Scheme -> Run -> Info -> Build Configuration -> Release
 
@@ -81,10 +81,11 @@ This will allow for testing on actual iPhones and iPads without TestFlight or th
       The process may take a few minutes to complete.
 
 8. The new binary will become available in iTunesConnect.
+```
 
+##BUILD OFFLINE BUNDLE FOR ANDROID(Signed APK):
 
-# BUILD OFFLINE BUNDLE FOR ANDROID(Signed APK):
-
+```
 1. Follow the guidelines for generating a signing key, setting up gradle variables and add signing config to gradle
       https://facebook.github.io/react-native/docs/signed-apk-android.html
 
@@ -92,12 +93,14 @@ This will allow for testing on actual iPhones and iPads without TestFlight or th
       Note that it is beneficial to run './gradlew clean' first to ensure a clean build
 
 3. Run 'react-native run-android --variant=release'
+```
 
+##SUBMIT SIGNED APK TO GOOGLE PLAY CONSOLE:
 
-# SUBMIT SIGNED APK TO GOOGLE PLAY CONSOLE:
-
+```
 1. Generate signed APK file
 
 2. The generated APK is found under android/app/build/outputs/apk/app-release.apk
 
 3. Upload this file to Google Play Console.
+```
