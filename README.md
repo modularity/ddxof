@@ -24,7 +24,9 @@ Copyright: Dr. Tom Fadial
 
 App Developer: Lauren Dunlap, Programmer Analyst III, CTRL | DGIT | David Geffen School of Medicine at UCLA
 
-#INSTALLATION:
+
+
+## INSTALLATION:
 
 1. Follow [instructions](https://facebook.github.io/react-native/docs/getting-started.html) to setup a React-Native project environment with Native Code.
 
@@ -45,8 +47,8 @@ App Developer: Lauren Dunlap, Programmer Analyst III, CTRL | DGIT | David Geffen
 8. To trail device logs, run 'react-native log-android' or 'react-native log-ios'
 
 
-#BUILD OFFLINE BUNDLE FOR iOS:
 
+## BUILD OFFLINE BUNDLE FOR iOS:
       This will allow for testing on actual iPhones and iPads without TestFlight or the App Store
 
 1. Update Xcode scheme for project
@@ -58,8 +60,8 @@ App Developer: Lauren Dunlap, Programmer Analyst III, CTRL | DGIT | David Geffen
         Note can also run 'react-native run-ios --variant=release'
 
 
-#SUBMIT RELEASE BUILD TO APP STORE:
 
+## SUBMIT RELEASE BUILD TO APP STORE:
 
 1. Update Xcode scheme for project
        Product -> Scheme -> Edit Scheme -> Run -> Info -> Build Configuration -> Release
@@ -81,8 +83,8 @@ App Developer: Lauren Dunlap, Programmer Analyst III, CTRL | DGIT | David Geffen
 8. The new binary will become available in iTunesConnect.
 
 
-#BUILD OFFLINE BUNDLE FOR ANDROID(Signed APK):
 
+## BUILD OFFLINE BUNDLE FOR ANDROID(Signed APK):
 
 1. Follow [guidelines](https://facebook.github.io/react-native/docs/signed-apk-android.html) for generating a signing key, setting up gradle variables and add signing config to gradle
 
@@ -92,8 +94,8 @@ App Developer: Lauren Dunlap, Programmer Analyst III, CTRL | DGIT | David Geffen
 3. Run 'react-native run-android --variant=release'
 
 
-#SUBMIT SIGNED APK TO GOOGLE PLAY CONSOLE:
 
+## SUBMIT SIGNED APK TO GOOGLE PLAY CONSOLE:
 
 1. Generate signed APK file
 
