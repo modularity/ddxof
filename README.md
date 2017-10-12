@@ -24,15 +24,10 @@ Copyright: Dr. Tom Fadial
 
 App Developer: Lauren Dunlap, Programmer Analyst III, CTRL | DGIT | David Geffen School of Medicine at UCLA
 
-<<<<<<< HEAD
-#INSTALLATION:
-
-=======
 
 
 ## INSTALLATION:
 
->>>>>>> 27cc64811044a7d33bf293d018fd919bc5cf7e12
 1. Follow [instructions](https://facebook.github.io/react-native/docs/getting-started.html) to setup a React-Native project environment with Native Code.
 
 2. Add existing project files to your local copy and overwrite configuration files.
@@ -52,13 +47,8 @@ App Developer: Lauren Dunlap, Programmer Analyst III, CTRL | DGIT | David Geffen
 8. To trail device logs, run 'react-native log-android' or 'react-native log-ios'
 
 
-<<<<<<< HEAD
-#BUILD OFFLINE BUNDLE FOR iOS:
-
-=======
 
 ## BUILD OFFLINE BUNDLE FOR iOS:
->>>>>>> 27cc64811044a7d33bf293d018fd919bc5cf7e12
       This will allow for testing on actual iPhones and iPads without TestFlight or the App Store
 
 1. Update Xcode scheme for project
@@ -70,13 +60,8 @@ App Developer: Lauren Dunlap, Programmer Analyst III, CTRL | DGIT | David Geffen
         Note can also run 'react-native run-ios --variant=release'
 
 
-<<<<<<< HEAD
-#SUBMIT RELEASE BUILD TO APP STORE:
-
-=======
 
 ## SUBMIT RELEASE BUILD TO APP STORE:
->>>>>>> 27cc64811044a7d33bf293d018fd919bc5cf7e12
 
 1. Update Xcode scheme for project
        Product -> Scheme -> Edit Scheme -> Run -> Info -> Build Configuration -> Release
@@ -98,15 +83,9 @@ App Developer: Lauren Dunlap, Programmer Analyst III, CTRL | DGIT | David Geffen
 8. The new binary will become available in iTunesConnect.
 
 
-<<<<<<< HEAD
-#BUILD OFFLINE BUNDLE FOR ANDROID(Signed APK):
-
-
-=======
 
 ## BUILD OFFLINE BUNDLE FOR ANDROID(Signed APK):
 
->>>>>>> 27cc64811044a7d33bf293d018fd919bc5cf7e12
 1. Follow [guidelines](https://facebook.github.io/react-native/docs/signed-apk-android.html) for generating a signing key, setting up gradle variables and add signing config to gradle
 
 2. Generate the release APK by running 'cd android && ./gradlew assembleRelease'
@@ -115,13 +94,8 @@ App Developer: Lauren Dunlap, Programmer Analyst III, CTRL | DGIT | David Geffen
 3. Run 'react-native run-android --variant=release'
 
 
-<<<<<<< HEAD
-#SUBMIT SIGNED APK TO GOOGLE PLAY CONSOLE:
-
-=======
 
 ## SUBMIT SIGNED APK TO GOOGLE PLAY CONSOLE:
->>>>>>> 27cc64811044a7d33bf293d018fd919bc5cf7e12
 
 1. Generate signed APK file
 
