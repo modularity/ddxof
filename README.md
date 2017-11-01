@@ -24,7 +24,7 @@ Copyright: Dr. Tom Fadial
 
 App Developer: Lauren Dunlap, Programmer Analyst III, CTRL | DGIT | David Geffen School of Medicine at UCLA
 
-
+This project was supported in part by NIH National Center for Advancing Translational Science (NCATS) UCLA CTSI Grant Number UL1TR001881 through the Voucher program.
 
 ## INSTALLATION:
 
